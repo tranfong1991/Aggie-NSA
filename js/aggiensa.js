@@ -23,7 +23,7 @@ function initiate(){
 
                 $.ajax({
                   type: "POST",
-                  url: "downloadvideo.php",
+                  url: "getvideo.php",
                   data: {
                       video_id : id,
                       video_url : mp4url + id
@@ -48,7 +48,15 @@ function capture(){
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     var dataURL = canvas.toDataURL("image/png");
-    phpCallback(dataURL);
+    $.ajax({
+      type: "POST",
+      url: "aggiensa.php",
+      data: {
+          imageBase64 : dataURL
+      }
+    }).done(function(response) {
+      console.log(response);
+    });
 
     //THIS WORKS
     // $.ajax({
@@ -64,16 +72,4 @@ function capture(){
     //         console.log(response);
     //     }
     // });
-}
-
-function phpCallback(dataURL){
-    $.ajax({
-      type: "POST",
-      url: "aggiensa.php",
-      data: {
-          imageBase64 : dataURL
-      }
-    }).done(function(response) {
-      console.log(response);
-    });
 }
