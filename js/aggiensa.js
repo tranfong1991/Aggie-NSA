@@ -21,7 +21,7 @@ function initiate(){
                 var id = isYoutube[1].match(/watch\?v=|[\w\W]+/gi);
                 id = (id.length > 1) ? id.splice(1) : id;
                 id = id.toString();
-                var mp4url = "https://www.youtubeinmp4.com/redirect.php?video=";
+                var mp4url = "http://www.youtubeinmp4.com/redirect.php?video=";
                 video.src = mp4url + id;
             }
         }
@@ -33,31 +33,14 @@ function capture(){
     var canvas = document.getElementById('my_canvas');
     var context = canvas.getContext('2d');
     
-    canvas.width = 600;
-    canvas.height = 500;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
     
-    // context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    var dataURL = canvas.toDataURL('img/jpg');
-    // var real = dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
-    // console.log(dataURL);
-        
-    $.ajax({
-        url: 'http://gateway-a.watsonplatform.net/calls/image/ImageGetRankedImageFaceTags',
-        type: 'POST',
-        contentType: 'application/x-www-form-urlencoded',
-        data: {
-            apikey: ALCHEMY_API_KEY,
-            image: dataURL,
-            outputMode: 'json',
-            imagePostMode: 'raw',
-            knowledgeGraph: 1
-        },
-        success: function(response) {
-            console.log(response);
-        }
-    });
-    
+    var dataURL = canvas.toDataURL("image/png");
+    phpCallback(dataURL);
+
     //THIS WORKS
     // $.ajax({
     //     url: 'http://gateway-a.watsonplatform.net/calls/url/URLGetRankedImageFaceTags',
@@ -72,4 +55,16 @@ function capture(){
     //         console.log(response);
     //     }
     // });
+}
+
+function phpCallback(dataURL){
+    $.ajax({
+      type: "POST",
+      url: "aggiensa.php",
+      data: {
+          imageBase64 : dataURL
+      }
+    }).done(function(response) {
+      console.log(response);
+    });
 }
