@@ -72,20 +72,47 @@
             <div class="col-lg-12 text-center">
                 <h1>Aggie NSA</h1>
                 <p class="lead">Let's see who that motherfucker is</p>
+                
+                <div class="navbar-form">
+            		<div class="input-group">
+            			<input type="text" class="form-control" placeholder="Video ID" id="srch-term">
+            			<div class="input-group-btn">
+            				<button class="btn btn-default" onclick="search()"><i class="glyphicon glyphicon-search"></i></button>
+            			</div>
+            		</div>
+        		</div>
                     
-                <video id="my_player" src="youtube.be/MNEAp4secwM" controls="true"></video>
-                <!--<video id="my_player" controls loop>-->
-                <!--    <source src="videos/MNEAp4secwM.mp4" type="video/mp4">-->
-                <!--</video>-->
-                <canvas id="my_canvas"></canvas>
-                <button onclick="initiate();">Initiate</button>
-                <button onclick="capture();">Capture</button>
+                <video id="my_player" controls="true"></video>
+                <br>
+                <canvas id="my_canvas" hidden></canvas>
+                <br>
+                <button class="btn btn-default" onclick="capture();">Capture</button>
             </div>
         </div>
         <!-- /.row -->
         
     </div>
     <!-- /.container -->
+    
+    <template id="result">
+        <div class="container" id="result_container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div id="person"></div>
+                </div>
+                <div class="col-lg-12">
+                    <div id="work"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="item">
+        <div style="float:left; padding:20px;">
+            <img id="picture" style="height: 200px;">
+            <h3 id="name"></h2>
+        </div>
+    </template>
 
     <!-- jQuery Version 1.11.1 -->
     <script src="js/jquery.js"></script>

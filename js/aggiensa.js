@@ -1,41 +1,6 @@
-function initiate(){
-    var videos = document.querySelectorAll("video");
-   
-    for (var i = 0, l = videos.length; i < l; i++) {
-        var video = videos[i];
-        var src = video.src || (function () {
-            var sources = video.querySelectorAll("source");
-            for (var j = 0, sl = sources.length; j < sl; j++) {
-                var source = sources[j];
-                var type = source.type;
-                var isMp4 = type.indexOf("mp4") != -1;
-                if (isMp4) return source.src;
-            }
-            return null;
-        })();
-        if (src) {
-            var isYoutube = src && src.match(/(?:youtu|youtube)(?:\.com|\.be)\/([\w\W]+)/i);
-            if (isYoutube) {
-                var id = isYoutube[1].match(/watch\?v=|[\w\W]+/gi);
-                id = (id.length > 1) ? id.splice(1) : id;
-                id = id.toString();
-                var mp4url = "https://www.youtubeinmp4.com/redirect.php?video=";
-
-                $.ajax({
-                  type: "POST",
-                  url: "getvideo.php",
-                  data: {
-                      video_id : id,
-                      video_url : mp4url + id
-                  }
-                }).done(function(response) {
-                  console.log(response);
-                  video.src = "videos/" + id + ".mp4";
-                });
-            }
-        }
-    } 
-}
+var TMDb_API_KEY = "e5b0a1804996442dd73bd1accee761a0";
+var TMDb_URL = "http://api.themoviedb.org/3/search/person";
+var TMDb_IMAGE_URL = "http://image.tmdb.org/t/p/w500";
 
 function capture(){
     var video = document.getElementById("my_player");
@@ -56,20 +21,99 @@ function capture(){
       }
     }).done(function(response) {
       console.log(response);
+      if(response.status == "OK")
+          populateResult(response);
     });
+}
 
-    //THIS WORKS
-    // $.ajax({
-    //     url: 'http://gateway-a.watsonplatform.net/calls/url/URLGetRankedImageFaceTags',
-    //     type: 'GET',
-    //     data: {
-    //         apikey: ALCHEMY_API_KEY,
-    //         url: 'http://ruby-on-rails-tranfong1991.c9users.io/Aggie-NSA/js/Jennifer-Garner.jpg',
-    //         outputMode: 'json',
-    //         knowledgeGraph: 1
-    //     },
-    //     success: function(response) {
-    //         console.log(response);
-    //     }
-    // });
+function search(){
+    var id = document.getElementById('srch-term').value;
+    var video = document.getElementById('my_player');
+    var mp4url = "https://www.youtubeinmp4.com/redirect.php?video=";
+
+    $.ajax({
+      type: "POST",
+      url: "getvideo.php",
+      data: {
+          video_id : id,
+          video_url : mp4url + id
+      }
+    }).done(function(response) {
+      console.log(response);
+      video.src = "videos/" + id + ".mp4";
+    });
+}
+
+function populateResult(json){
+    var imageFacesArray = json['imageFaces'];
+    var nameArray = new Array();
+    
+    for(var i = 0; i<imageFacesArray.length; i++){
+        var obj = imageFacesArray[i];
+        
+        if(obj.hasOwnProperty('identity'))
+            nameArray.push(obj.identity.name);
+    }
+    
+    for(var i = 0; i<nameArray.length; i++){
+        $.ajax({
+            type: "GET",
+            url: TMDb_URL,
+            data: {
+                api_key : TMDb_API_KEY,
+                query : encodeURIComponent(nameArray[i])
+            }
+        }).done(function(response){
+            if(response.total_results > 0){
+                populateTemplate(response);
+            }
+        });
+    }
+}
+
+function populateTemplate(json){
+    var itemTemplate = document.querySelector("#item");
+    var resultTemplate = document.querySelector("#result");
+    var results = json.results;
+    
+    for(var i = 0; i<results.length; i++){
+        var itemObj = results[i];
+        
+        if(itemObj.profile_path == null)
+            continue;
+        
+        itemTemplate.content.querySelector("#picture").src = TMDb_IMAGE_URL + itemObj.profile_path;
+        itemTemplate.content.querySelector("#name").innerHTML = itemObj.name;
+        
+        var itemClone = document.importNode(itemTemplate.content, true);
+        
+        //remove all child node before appending a new one
+        removeAllChildNodes(resultTemplate.content.querySelector("#person"));
+        resultTemplate.content.querySelector("#person").appendChild(itemClone);
+        
+        var worksArray = itemObj.known_for;        
+        removeAllChildNodes(resultTemplate.content.querySelector("#work"));
+        
+        for(var j = 0 ; j<worksArray.length; j++){
+            var workObj = worksArray[j];
+            
+            itemTemplate.content.querySelector("#picture").src = TMDb_IMAGE_URL + workObj.poster_path;
+            if(workObj.hasOwnProperty('name'))
+                itemTemplate.content.querySelector("#name").innerHTML = workObj.name;
+            else if(workObj.hasOwnProperty('title'))
+                itemTemplate.content.querySelector("#name").innerHTML = workObj.title;
+            
+            var workClone = document.importNode(itemTemplate.content, true);
+            resultTemplate.content.querySelector("#work").appendChild(workClone);
+        }
+        
+        var resultClone = document.importNode(resultTemplate.content, true);
+        document.body.appendChild(resultClone);
+    }
+}
+
+function removeAllChildNodes(element){
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
 }
