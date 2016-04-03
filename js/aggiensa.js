@@ -29,7 +29,7 @@ function capture(){
 function search(){
     var id = document.getElementById('srch-term').value;
     var video = document.getElementById('my_player');
-    var mp4url = "https://www.youtubeinmp4.com/redirect.php?video=";
+    var mp4url = "http://www.youtubeinmp4.com/redirect.php?video=";
 
     $.ajax({
       type: "POST",
