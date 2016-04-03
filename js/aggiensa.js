@@ -20,7 +20,6 @@ function capture(){
           imageBase64 : dataURL
       }
     }).done(function(response) {
-      console.log(response);
       if(response.status == "OK")
           populateResult(response);
     });
@@ -39,7 +38,6 @@ function search(){
           video_url : mp4url + id
       }
     }).done(function(response) {
-      console.log(response);
       video.src = "videos/" + id + ".mp4";
     });
 }
